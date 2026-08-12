@@ -99,6 +99,11 @@ CFG = Config()
 # 6-point eye contours used for the classic Soukupova & Cech EAR formula.
 LEFT_EYE_IDX = [362, 385, 387, 263, 373, 380]
 RIGHT_EYE_IDX = [33, 160, 158, 133, 153, 144]
+# --- Mouth contours for Yawning Detection ---
+MOUTH_TOP_BOTTOM_IDX = [13, 14, 87, 317, 82, 312] 
+MOUTH_LEFT_RIGHT_IDX = [78, 308]                
+
+MAR_THRESHOLD = 0.6  
 
 # 6-point subset used for solvePnP head-pose estimation (approximate
 # generic 3D face model in millimeters -> standard head-pose tutorial set).
@@ -172,11 +177,7 @@ class AlertSystem:
             wave = 0.6 * wave + 0.4 * sweep
 
         wave = (wave * 32767 * 0.5).astype(np.int16)
-        
-        # --- FIX: Convert 1D Mono wave into 2D Stereo wave for Pygame ---
-        stereo_wave = np.column_stack((wave, wave))
-        
-        return pygame.sndarray.make_sound(stereo_wave)
+        return pygame.sndarray.make_sound(wave)
 
     # -- public control -------------------------------------------------
     def start_drowsy_alert(self) -> None:
@@ -243,6 +244,20 @@ def eye_aspect_ratio(landmarks_px, eye_idx) -> float:
     if horizontal == 0:
         return 0.0
     return (vertical_1 + vertical_2) / (2.0 * horizontal)
+
+def mouth_aspect_ratio(landmarks_px) -> float:
+    """Calculate Mouth Aspect Ratio (MAR) to detect yawning."""
+   
+    v1 = euclidean(landmarks_px[82], landmarks_px[87])
+    v2 = euclidean(landmarks_px[312], landmarks_px[317])
+    v3 = euclidean(landmarks_px[13], landmarks_px[14])
+    
+
+    horizontal = euclidean(landmarks_px[78], landmarks_px[308])
+    
+    if horizontal == 0:
+        return 0.0
+    return (v1 + v2 + v3) / (3.0 * horizontal)
 
 
 def estimate_head_pose(
@@ -429,18 +444,19 @@ class DrowsinessDistractionMonitor:
         landmarks_px = self._landmarks_to_px(results.multi_face_landmarks[0], frame.shape)
 
         # ---------------- Drowsiness (EAR) ----------------
+        # ---------------- Drowsiness (EAR + MAR) ----------------
         left_ear = eye_aspect_ratio(landmarks_px, LEFT_EYE_IDX)
         right_ear = eye_aspect_ratio(landmarks_px, RIGHT_EYE_IDX)
         raw_avg_ear = (left_ear + right_ear) / 2.0
         avg_ear = self._smoothed_ear(raw_avg_ear)
+        
+        # Calculate MAR for Yawning
+        current_mar = mouth_aspect_ratio(landmarks_px)
 
-        eyes_closed = avg_ear < self.cfg.ear_threshold
-        self.drowsy_trigger.update(eyes_closed)
-
-        if self.drowsy_trigger.active:
-            self.alerts.start_drowsy_alert()
-        else:
-            self.alerts.stop_drowsy_alert()
+        # FIX FOR SUNGLASSES: If the user is wearing sunglasses, the EAR may not be reliable. In such cases, we can use MAR to detect yawning as an additional indicator of drowsiness. If either the EAR is below the threshold or the MAR exceeds the yawning threshold, we consider the user drowsy.
+        eyes_closed_or_yawning = (avg_ear < self.cfg.ear_threshold) or (current_mar > MAR_THRESHOLD)
+        
+        self.drowsy_trigger.update(eyes_closed_or_yawning)
 
         # ---------------- Distraction (Head pose) ----------------
         pose = estimate_head_pose(landmarks_px, frame.shape)

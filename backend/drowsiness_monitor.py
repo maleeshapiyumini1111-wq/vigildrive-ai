@@ -137,17 +137,27 @@ class AlertSystem:
     """
 
     def __init__(self, enable_voice: bool = True) -> None:
-        pygame.mixer.pre_init(frequency=44100, size=-16, channels=1)
-        pygame.mixer.init()
-        pygame.mixer.set_num_channels(8)
+        self._audio_available = True
+        try:
+            pygame.mixer.pre_init(frequency=44100, size=-16, channels=1)
+            pygame.mixer.init()
+            pygame.mixer.set_num_channels(8)
 
-        self._drowsy_sound = self._make_tone(freq=880, duration=0.35, pattern="pulse")
-        self._distraction_sound = self._make_tone(freq=523, duration=0.5, pattern="sweep")
+            self._drowsy_sound = self._make_tone(freq=880, duration=0.35, pattern="pulse")
+            self._distraction_sound = self._make_tone(freq=523, duration=0.5, pattern="sweep")
 
-        self._drowsy_channel = pygame.mixer.Channel(0)
-        self._distraction_channel = pygame.mixer.Channel(1)
+            self._drowsy_channel = pygame.mixer.Channel(0)
+            self._distraction_channel = pygame.mixer.Channel(1)
+        except Exception as exc:
+            # No audio device available (headless server, no speakers, audio
+            # device busy, etc). Detection/video/API must keep working even
+            # without sound — the browser-side alarm (App.jsx) still fires.
+            print(f"[AlertSystem] Audio hardware unavailable, disabling server-side tones: {exc}")
+            self._audio_available = False
+            self._drowsy_sound = self._distraction_sound = None
+            self._drowsy_channel = self._distraction_channel = None
 
-        self._voice_enabled = enable_voice and _PYTTSX3_AVAILABLE
+        self._voice_enabled = enable_voice and _PYTTSX3_AVAILABLE and self._audio_available
         self._voice_queue: "queue.Queue[str]" = queue.Queue()
         self._last_voice_time = {"drowsy": 0.0, "distraction": 0.0}
         if self._voice_enabled:
@@ -180,27 +190,36 @@ class AlertSystem:
 
     # -- public control -------------------------------------------------
     def start_drowsy_alert(self) -> None:
+        if not self._audio_available:
+            return
         if not self._drowsy_channel.get_busy():
             self._drowsy_channel.play(self._drowsy_sound, loops=-1)
         self._maybe_speak("drowsy", "Warning. Drowsiness detected. Please stay alert.")
 
     def stop_drowsy_alert(self) -> None:
+        if not self._audio_available:
+            return
         if self._drowsy_channel.get_busy():
             self._drowsy_channel.stop()
 
     def start_distraction_alert(self) -> None:
+        if not self._audio_available:
+            return
         if not self._distraction_channel.get_busy():
             self._distraction_channel.play(self._distraction_sound, loops=-1)
         self._maybe_speak("distraction", "Warning. Eyes on the road.")
 
     def stop_distraction_alert(self) -> None:
+        if not self._audio_available:
+            return
         if self._distraction_channel.get_busy():
             self._distraction_channel.stop()
 
     def shutdown(self) -> None:
         self.stop_drowsy_alert()
         self.stop_distraction_alert()
-        pygame.mixer.quit()
+        if self._audio_available:
+            pygame.mixer.quit()
 
     # -- voice (optional, throttled, background thread) -----------------
     def _maybe_speak(self, key: str, message: str) -> None:
@@ -383,6 +402,40 @@ class DrowsinessDistractionMonitor:
         self.ear_history: list[float] = []
         self.fps_meter = FPSMeter(cfg.fps_smoothing)
 
+        # --- Web/API status snapshot (used by vision_service.py so the
+        # React frontend can poll this monitor over HTTP; does not affect
+        # detection thresholds or logic above). ---
+        self.status: str = "NORMAL"          # NORMAL | DROWSY | DISTRACTED | NO_FACE
+        self.last_event: str = "STATUS: NORMAL - Driver Attentive"
+        self.last_ear: float = 0.320
+        self.last_yaw: float = 0.0
+        self.last_pitch: float = 0.0
+        self.last_roll: float = 0.0
+        self.look_direction: str = "FORWARD"
+        self.event_logs: "list[str]" = []
+
+    def _push_log(self, message: str) -> None:
+        stamp = time.strftime("%H:%M:%S")
+        entry = f"[{stamp}] {message}"
+        if not self.event_logs or self.event_logs[0] != entry:
+            self.event_logs.insert(0, entry)
+            self.event_logs = self.event_logs[:40]
+
+    def get_status(self) -> dict:
+        """Snapshot dict matching the shape App.jsx's visionData expects."""
+        return {
+            "status": self.status,
+            "ear": round(self.last_ear, 3),
+            "yaw": round(self.last_yaw, 1),
+            "pitch": round(self.last_pitch, 1),
+            "roll": round(self.last_roll, 1),
+            "drowsyElapsed": round(self.drowsy_trigger.elapsed, 1),
+            "distractionElapsed": round(self.distraction_trigger.elapsed, 1),
+            "lookDirection": self.look_direction,
+            "lastEvent": self.last_event,
+            "logs": self.event_logs,
+        }
+
     # -- landmark extraction -------------------------------------------
     @staticmethod
     def _landmarks_to_px(face_landmarks, frame_shape) -> list[Tuple[float, float]]:
@@ -419,8 +472,13 @@ class DrowsinessDistractionMonitor:
                     f"DISTRACTION ALERT: FACE NOT VISIBLE {self.no_face_trigger.elapsed:0.1f}s",
                     COLOR_ALERT,
                 )
+                self.status = "NO_FACE"
+                self.last_event = f"DISTRACTION ALERT: Face not visible {self.no_face_trigger.elapsed:0.1f}s"
+                self._push_log("⚠️ DISTRACTION: Driver's face not visible to camera!")
             else:
                 self.alerts.stop_distraction_alert()
+                self.status = "NORMAL"
+                self.last_event = "STATUS: NORMAL - Searching for face"
             self.alerts.stop_drowsy_alert()
             self._draw_fps(frame, fps)
             return frame
@@ -462,6 +520,22 @@ class DrowsinessDistractionMonitor:
 
         # ---------------- UI ----------------
         self._draw_ui(frame, avg_ear, pitch, yaw, roll, fps, landmarks_px)
+
+        # ---------------- Web/API state snapshot ----------------
+        self.last_ear, self.last_yaw, self.last_pitch, self.last_roll = avg_ear, yaw, pitch, roll
+        if self.drowsy_trigger.active:
+            self.status = "DROWSY"
+            self.last_event = f"DROWSINESS ALERT! Eyes closed {self.drowsy_trigger.elapsed:0.1f}s"
+            self._push_log(f"⚠️ DROWSINESS: Eyes closed for {self.drowsy_trigger.elapsed:0.1f}s (EAR {avg_ear:0.3f})")
+        elif self.distraction_trigger.active:
+            self.look_direction = self._look_direction(yaw, pitch)
+            self.status = "DISTRACTED"
+            self.last_event = f"DISTRACTION ALERT! Looking {self.look_direction} {self.distraction_trigger.elapsed:0.1f}s"
+            self._push_log(f"⚠️ DISTRACTION: Looking {self.look_direction} for {self.distraction_trigger.elapsed:0.1f}s")
+        else:
+            self.look_direction = "FORWARD"
+            self.status = "NORMAL"
+            self.last_event = "STATUS: NORMAL - Driver Attentive"
         return frame
 
     # -- UI rendering -----------------------------------------------------

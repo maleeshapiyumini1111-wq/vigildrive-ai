@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VigilDrive AI - Project Proposal</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 20mm 18mm 20mm;
+  }
+  body {
+    font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+    color: #1a202c;
+    line-height: 1.5;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+    font-size: 13.5px;
+  }
+  .header {
+    border-bottom: 2px solid #2b6cb0;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  .title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a365d;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5568;
+    margin: 0;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-size: 12.5px;
+  }
+  .meta-item strong {
+    color: #2d3748;
+  }
+  h2 {
+    font-size: 15px;
+    color: #2b6cb0;
+    border-left: 4px solid #2b6cb0;
+    padding-left: 8px;
+    margin: 16px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  p {
+    margin: 0 0 8px 0;
+    text-align: justify;
+  }
+  ul {
+    margin: 0 0 10px 0;
+    padding-left: 20px;
+  }
+  li {
+    margin-bottom: 4px;
+  }
+  .architecture-box {
+    background: #edf2f7;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11.5px;
+    white-space: pre-wrap;
+    line-height: 1.35;
+    margin: 10px 0 16px 0;
+    color: #1a202c;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px 0;
+    font-size: 12.5px;
+  }
+  th, td {
+    border: 1px solid #cbd5e0;
+    padding: 6px 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    font-weight: 600;
+  }
+  .highlight-badge {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="title">VigilDrive AI</div>
+  <div class="subtitle">Multi-Modal Driver Safety, Crash Telemetry & Automated Emergency Dispatch Ecosystem</div>
+</div>
+
+<div class="meta-grid">
+  <div class="meta-item"><strong>Domain:</strong> Embedded IoT, Computer Vision, Cloud APIs & Mobile Systems</div>
+  <div class="meta-item"><strong>Target Audience:</strong> Two-Wheelers & Three-Wheelers (Fleet / Commuter)</div>
+  <div class="meta-item"><strong>Hardware Prototype:</strong> ESP32 Microcontroller + MPU-6050 6-Axis IMU</div>
+  <div class="meta-item"><strong>Software Stack:</strong> Python (FastAPI), Flutter Mobile, MediaPipe, OpenCV</div>
+</div>
+
+<h2>1. Executive Summary & Problem Statement</h2>
+<p>
+  Road traffic collisions involving two-wheelers and three-wheelers represent the highest percentage of vehicular fatalities across developing nations. Critical factors contributing to high mortality include <strong>delayed emergency response (the Golden Hour dilemma)</strong> and <strong>driver fatigue/distraction</strong>. Existing commercial smart helmets are prohibitively expensive ($150–$400), non-transferable, and require specialized hardware configurations. 
+</p>
+<p>
+  <strong>VigilDrive AI</strong> introduces an ultra-low-cost, multi-modal safety ecosystem. It couples a universal clip-on IoT module for any existing motorcycle helmet with an edge-vision cabin fatigue monitoring system for three-wheelers, offloading high-cost cellular and GPS computation to the rider's smartphone.
+</p>
+
+<h2>2. System Architecture & End-to-End Data Pipeline</h2>
+<div class="architecture-box">
+[ LAYER 1: EMBEDDED SENSING ]
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ Universal Helmet Add-on: ESP32 + MPU-6050 (Accelerometer + Gyroscope)   │
+ └───────────────────────────────────┬────────────────────────────────────┘
+                                     │ (Bluetooth Low Energy - BLE)
+                                     ▼
+[ LAYER 2: MOBILE GATEWAY ]
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ Flutter Application (Smartphone)                                       │
+ │ • Native GPS Telemetry Acquisition (Live Lat/Lng)                      │
+ │ • Two-Stage Impact Verification & 10s Cancellation Timer               │
+ │ • Direct Native SIM SOS Dispatcher (Zero SMS API Dependency)           │
+ └──────────────────┬─────────────────────────────────┬───────────────────┘
+                    │ (Live Stream / Telemetry)       │ (Synchronous HTTP)
+                    ▼                                 ▼
+[ LAYER 3: EDGE AI & CLOUD BACKEND ]
+ ┌──────────────────────────────────────────┐  ┌──────────────────────────┐
+ │ Computer Vision Pipeline (FastAPI/MediaPipe)│  │ Telemetry & Incident Core│
+ │ • Eye Aspect Ratio (EAR) Blink Tracking  │  │ • SQLite / MongoDB Log   │
+ │ • Head Pose & Fatigue Classification     │  │ • Emergency Coordination │
+ └──────────────────────────────────────────┘  └──────────────────────────┘
+</div>
+
+<h2>3. Key Technical Novelty & Engineering Highlights</h2>
+<ul>
+  <li><strong>Edge-Offloaded Cost Optimization:</strong> By routing GPS acquisition, high-speed cellular transmission, and SMS dispatching through the rider's mobile device via BLE, the hardware production cost is maintained below <span class="highlight-badge">LKR 4,500 (~$15)</span> with extended multi-day battery endurance.</li>
+  <li><strong>Dual-Stage Crash Verification (Anti-False Alarm):</strong> Sudden impact threshold spikes (>4G) initiate a local audio alert and a 10-second mobile countdown. If the rider cancels the prompt, false SOS alerts from accidental helmet drops are completely eliminated.</li>
+  <li><strong>Dual-Mode Hybrid Architecture:</strong> Provides two-wheeler safety via IMU-based kinematics (impact + head nodding) and three-wheeler cabin safety via non-intrusive facial landmark tracking.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<h2>4. Technical Stack Breakdown</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Layer / Component</th>
+      <th>Technologies Used</th>
+      <th>Functional Responsibility</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Embedded Hardware</strong></td>
+      <td>ESP32, MPU-6050, TP4056, Li-Po Battery</td>
+      <td>Real-time G-force impact and angular head-tilt telemetry sampling via I2C.</td>
+    </tr>
+    <tr>
+      <td><strong>Local Connectivity</strong></td>
+      <td>Bluetooth Low Energy (BLE 5.0)</td>
+      <td>Ultra-low latency, low-power sensor data broadcasting to the mobile gateway.</td>
+    </tr>
+    <tr>
+      <td><strong>Mobile Gateway</strong></td>
+      <td>Flutter (Dart), Geolocator, Telephony</td>
+      <td>Live GPS syncing, local timer management, and direct SIM-based SMS dispatch.</td>
+    </tr>
+    <tr>
+      <td><strong>Vision AI Engine</strong></td>
+      <td>Python, MediaPipe, OpenCV</td>
+      <td>Facial mesh extraction, Eye Aspect Ratio (EAR) computation, distraction alerts.</td>
+    </tr>
+    <tr>
+      <td><strong>Core Backend</strong></td>
+      <td>FastAPI, Uvicorn, Asynchronous REST</td>
+      <td>Centralized incident logging, telemetry relay, and monitoring endpoints.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5. Cost-Benefit & Commercial Feasibility Analysis</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Feature Metric</th>
+      <th>Commercial Smart Helmets (e.g., Livall, Quin)</th>
+      <th>VigilDrive AI Universal Solution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>End-User Cost</strong></td>
+      <td>$150 – $400+ (LKR 45,000 – 120,000+)</td>
+      <td><strong>LKR 4,000 – 6,000 (~$15 - $20)</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Compatibility</strong></td>
+      <td>Proprietary dedicated helmets only</td>
+      <td><strong>Universal retrofit clip-on for any existing helmet</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Network Dependency</strong></td>
+      <td>Requires dedicated cellular SIM/Data plan</td>
+      <td><strong>Utilizes existing user smartphone data & native SMS</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Fleet Applicability</strong></td>
+      <td>Limited to motorcycle riders</td>
+      <td><strong>Dual-mode support for Three-wheeler & Delivery Fleets</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6. Supervision & Research Objectives</h2>
+<ul>
+  <li><strong>Kinematic Calibration:</strong> Refining accelerometer threshold limits and Kalman filtering algorithms to isolate actual crash profiles from road vibrations and speed bumps.</li>
+  <li><strong>Mobile Inference Optimization:</strong> Optimizing edge-vision frame throughput to achieve high accuracy without device thermal throttling.</li>
+  <li><strong>Formal Evaluation:</strong> Establishing verified metrics on response latency, battery longevity, and crash detection accuracy for academic publication and incubation pitches.</li>
+</ul>
+
+</body>
+</html>

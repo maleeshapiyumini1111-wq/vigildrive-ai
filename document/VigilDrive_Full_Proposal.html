@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VigilDrive AI - Full Engineering & Technical Project Proposal</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 20mm 18mm 20mm;
+  }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    color: #1a202c;
+    line-height: 1.45;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+  }
+  .header {
+    border-bottom: 2.5px solid #2b6cb0;
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+  }
+  .title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1a365d;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .subtitle {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #4a5568;
+    margin: 0;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 12px;
+  }
+  .meta-item strong {
+    color: #2d3748;
+  }
+  h2 {
+    font-size: 14.5px;
+    color: #2b6cb0;
+    border-left: 4px solid #2b6cb0;
+    padding-left: 8px;
+    margin: 16px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  h3 {
+    font-size: 13px;
+    color: #2d3748;
+    margin: 10px 0 4px 0;
+  }
+  p {
+    margin: 0 0 6px 0;
+    text-align: justify;
+  }
+  ul, ol {
+    margin: 0 0 8px 0;
+    padding-left: 18px;
+  }
+  li {
+    margin-bottom: 3px;
+  }
+  .code-box {
+    background: #edf2f7;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    white-space: pre-wrap;
+    line-height: 1.35;
+    margin: 8px 0 12px 0;
+    color: #1a202c;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 12px 0;
+    font-size: 12px;
+  }
+  th, td {
+    border: 1px solid #cbd5e0;
+    padding: 5px 8px;
+    text-align: left;
+  }
+  th {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    font-weight: 700;
+  }
+  .highlight-badge {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .formula-box {
+    background-color: #f7fafc;
+    border-left: 3px solid #4299e1;
+    padding: 6px 10px;
+    margin: 6px 0;
+    font-family: 'Consolas', monospace;
+    font-size: 11.5px;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="title">PROJECT PROPOSAL: VIGILDRIVE AI</div>
+  <div class="subtitle">Multi-Modal Driver Safety Ecosystem via Context-Aware Telemetry, Embedded Kinematics & Edge Vision</div>
+</div>
+
+<div class="meta-grid">
+  <div class="meta-item"><strong>Project Domain:</strong> Embedded IoT, Computer Vision, Sensor Fusion & Telemetry</div>
+  <div class="meta-item"><strong>Target Scope:</strong> Two-Wheeler Commuters & Three-Wheeler / Light Fleets</div>
+  <div class="meta-item"><strong>Hardware Prototype:</strong> ESP32 SoC + MPU-6050 (6-DOF IMU) via BLE 5.0</div>
+  <div class="meta-item"><strong>Software Architecture:</strong> Flutter Mobile OS Gateway + FastAPI Microservices</div>
+</div>
+
+<h2>1. Executive Summary & Problem Formulation</h2>
+<p>
+  Road traffic collisions involving two-wheelers and three-wheelers represent over 50% of vehicular fatalities in developing transit infrastructures. The major determinants of mortality are <strong>the Golden Hour emergency medical service (EMS) dispatch delay</strong> and <strong>undetected driver microsleep/distraction</strong>. 
+</p>
+<p>
+  While high-end commercial smart helmets exist, their prohibitive cost ($150–$400) and vehicle-locked architectures prevent widespread adoption. <strong>VigilDrive AI</strong> solves this through an <strong>Edge-Offloaded Paradigm</strong>: a universal, ultra-low-cost (~$15 / LKR 4,500) clip-on IoT module attached to any standard helmet coupled with a smartphone gateway that handles intensive compute, live satellite GPS indexing, and direct GSM emergency dispatching.
+</p>
+
+<h2>2. Complete System Architecture & Pipeline</h2>
+<div class="code-box">
++──────────────────────────────────────────────────────────────────────────+
+| LAYER 1: EMBEDDED INERTIAL SENSING NODE (Universal Helmet Clip-on)        |
+| • ESP32 Microcontroller (100Hz I2C Sampling)                            |
+| • MPU-6050 (6-Axis IMU: 3-Axis Accelerometer + 3-Axis Gyroscope)         |
+| • Active Piezo Buzzer Alert + TP4056 USB-C Li-Po Power Management        |
++────────────────────────────────────┬─────────────────────────────────────+
+                                     │ Bluetooth Low Energy (BLE 5.0 GATT)
+                                     ▼
++──────────────────────────────────────────────────────────────────────────+
+| LAYER 2: MOBILE EDGE GATEWAY (Flutter Android/iOS Background Service)     |
+| • Native GPS Telemetry Stream: Real-Time Velocity (v) & Heading (θ)      |
+| • Context-Aware Decision Engine: Cross-Validates G-Spikes with Dynamics   |
+| • 10-Second Grace Period Engine: Prevents False Alarms from Helmet Drops |
+| • Native Telephony Gateway: Automated Emergency SMS via Local Carrier SIM|
++──────────────────┬─────────────────────────────────┬─────────────────────+
+                   │ Live Video Frames (Cabin Mode)  │ REST / WebSockets
+                   ▼                                 ▼
++─────────────────────────────────────────+  +─────────────────────────────+
+| LAYER 3A: CABIN VISION PIPELINE         |  | LAYER 3B: BACKEND CORE      |
+| • MediaPipe Face Mesh Landmark Tracking |  | • FastAPI Telemetry Logger  |
+| • Eye Aspect Ratio (EAR) Blink Engine   |  | • Incident Coordinate Sync  |
+| • Perspective-n-Point (PnP) Head Pose   |  | • Fleet Monitoring Admin    |
++─────────────────────────────────────────+  +─────────────────────────────+
+</div>
+
+<h2>3. Hardware & Sensor Specifications</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Component / Sensor</th>
+      <th>Technical Model</th>
+      <th>Operational Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Inertial Measurement Unit</strong></td>
+      <td>MPU-6050 (GY-521)</td>
+      <td>Samples 3-axis linear acceleration ($\pm 8g$) and 3-axis angular velocity ($\pm 500^\circ/\text{s}$) via I2C at 100 Hz.</td>
+    </tr>
+    <tr>
+      <td><strong>Processing Microcontroller</strong></td>
+      <td>ESP32-WROOM-32 / C3</td>
+      <td>Low-power kinematic acquisition, local thresholding, and continuous BLE 5.0 GATT telemetry broadcasting.</td>
+    </tr>
+    <tr>
+      <td><strong>Audio Feedback Unit</strong></td>
+      <td>Active Piezo Buzzer (3.3V)</td>
+      <td>Generates immediate localized acoustic alerts inside the helmet upon fatigue trigger.</td>
+    </tr>
+    <tr>
+      <td><strong>Power Management Subsystem</strong></td>
+      <td>TP4056 + 3.7V 600mAh Li-Po</td>
+      <td>USB-C rechargeable cell providing 48+ hours of active runtime via BLE deep-sleep cycling.</td>
+    </tr>
+    <tr>
+      <td><strong>Mobile Location Sensor</strong></td>
+      <td>Smartphone GNSS / GPS</td>
+      <td>Provides satellite-based coordinates, vehicle instantaneous velocity, and bearing heading.</td>
+    </tr>
+    <tr>
+      <td><strong>Optical Sensor (Cabin Mode)</strong></td>
+      <td>Smartphone Front RGB Cam</td>
+      <td>Captures driver facial geometry for real-time drowsiness classification in three-wheelers.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<h2>4. Mathematical Formulations & Detection Logic</h2>
+
+<h3>4.1. Total G-Force Vector Magnitude (Impact Detection)</h3>
+<p>Calculates the instantaneous linear resultant acceleration across all three spatial axes:</p>
+<div class="formula-box">
+  |A_total| = sqrt(ax^2 + ay^2 + az^2) / 9.80665   [Trigger Condition: |A_total| >= 4.5G]
+</div>
+
+<h3>4.2. Angular Pitch & Nodding Computation (IMU Kinematics)</h3>
+<p>Extracts gravitational tilt vectors to identify forward head drooping during fatigue:</p>
+<div class="formula-box">
+  Pitch_tilt = atan2(-ax, sqrt(ay^2 + az^2)) * (180 / PI)   [Trigger Condition: Pitch > 25 deg for >= 1.5s]
+</div>
+
+<h3>4.3. Eye Aspect Ratio - EAR (Computer Vision Pipeline)</h3>
+<p>Quantifies eye openness using 6 facial landmark Euclidean coordinates per eye:</p>
+<div class="formula-box">
+  EAR = (||p2 - p6|| + ||p3 - p5||) / (2 * ||p1 - p4||)   [Trigger Condition: EAR < 0.22 for >= 1.5s]
+</div>
+
+<h2>5. Multi-Sensor Context Validation Matrix</h2>
+<p>
+  To prevent false positives, inertial spikes from the helmet are evaluated against kinematic data from the smartphone's GPS:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operational Context</th>
+      <th>Helmet IMU Sensor Signal</th>
+      <th>Smartphone GPS Telemetry</th>
+      <th>Classification Output</th>
+      <th>System Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Normal Dynamic Cruising</strong></td>
+      <td>Low Vibration (|A| &lt; 1.5G)</td>
+      <td>Velocity &gt; 25 km/h, Heading Stable</td>
+      <td>Normal Transit</td>
+      <td>Passive Telemetry Log</td>
+    </tr>
+    <tr>
+      <td><strong>Accidental Helmet Drop</strong></td>
+      <td>High Impact Spike (|A| &gt; 4.5G)</td>
+      <td><strong>Velocity = 0 km/h (Static Vehicle)</strong></td>
+      <td><strong>False Alarm (Static Drop)</strong></td>
+      <td><strong>Suppressed (No SOS Dispatch)</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Severe Pothole / Road Anomaly</strong></td>
+      <td>Z-Axis Spike (|A| &gt; 3.0G)</td>
+      <td><strong>Velocity Sustained &gt; 20 km/h Post-Impact</strong></td>
+      <td><strong>Road Irregularity</strong></td>
+      <td><strong>Suppressed (No SOS Dispatch)</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Confirmed Crash / Collision</strong></td>
+      <td>Impact (|A| &gt; 4.5G) + Rotational Spike</td>
+      <td><strong>Velocity drops rapidly (e.g. 40 to 0 km/h)</strong></td>
+      <td><strong>Severe Collision Event</strong></td>
+      <td><strong>10s Cancelable SOS Countdown</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Microsleep / Head Nodding</strong></td>
+      <td>Pitch Tilt &gt; 25° for &gt; 1.5s</td>
+      <td><strong>Velocity &gt; 20 km/h (In-Transit)</strong></td>
+      <td><strong>Fatigue Risk Event</strong></td>
+      <td><strong>Helmet Audio Buzzer Beep</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Intentional Scan (Mirrors/Dash)</strong></td>
+      <td>Pitch / Yaw change &lt; 1.0s</td>
+      <td>Velocity &gt; 20 km/h, Heading Stable</td>
+      <td>Active Driver Scan</td>
+      <td>No Action</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6. Software Implementation Logic (Dart / Flutter Safety Engine)</h2>
+<div class="code-box">
+class VigilDriveSafetyEngine {
+  double currentSpeedKmh = 0.0;
+  double previousSpeedKmh = 0.0;
+  bool isVehicleMoving = false;
+
+  // 1. Ingest continuous GPS Telemetry
+  void onGpsTelemetryUpdate(double speedMps, double heading) {
+    previousSpeedKmh = currentSpeedKmh;
+    currentSpeedKmh = speedMps * 3.6; // Convert to km/h
+    isVehicleMoving = currentSpeedKmh > 15.0; // Dynamic motion threshold
+  }
+
+  // 2. Evaluate incoming BLE Sensor Stream
+  void evaluateSensorPayload({
+    required double gForceMagnitude,
+    required double gyroAngularRate,
+    required double pitchAngle,
+    required double tiltDurationSeconds,
+  }) {
+    // Condition A: Crash Impact Verification
+    if (gForceMagnitude >= 4.5 && gyroAngularRate > 180.0) {
+      bool suddenHalt = (previousSpeedKmh > 15.0) && (currentSpeedKmh < 5.0);
+      if (suddenHalt || isVehicleMoving) {
+        initiateEmergencyCountdown();
+      }
+    }
+
+    // Condition B: Head-Nodding Drowsiness Verification
+    if (pitchAngle > 25.0 && tiltDurationSeconds >= 1.5 && isVehicleMoving) {
+      triggerHelmetBuzzerAlert();
+    }
+  }
+
+  void initiateEmergencyCountdown() {
+    // Triggers 10-second audible timer UI before native cellular SMS dispatch
+  }
+}
+</div>
+
+<h2>7. Cost Analysis & Competitive Benchmarking</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Comparison Dimension</th>
+      <th>Commercial Smart Helmets (e.g. Livall, Quin)</th>
+      <th>VigilDrive AI System Architecture</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Unit Production Cost</strong></td>
+      <td>$150 – $400 (LKR 45,000 – 120,000+)</td>
+      <td><strong>~$15 (LKR 4,000 – 5,000)</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Physical Form Factor</strong></td>
+      <td>Requires complete replacement of helmet</td>
+      <td><strong>Universal retrofit clip-on for any helmet</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Cellular Telemetry Overhead</strong></td>
+      <td>Dedicated recurring cellular SIM plan required</td>
+      <td><strong>Zero extra cost (uses rider's existing smartphone)</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Fleet Applicability</strong></td>
+      <td>Motorcycles only</td>
+      <td><strong>Dual-mode support for Two-Wheelers & Three-Wheelers</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>8. Research & Supervision Objectives</h2>
+<ul>
+  <li><strong>Dynamic Filter Tuning:</strong> Implementation of a Kalman filter to eliminate high-frequency engine vibration noise from the IMU signal.</li>
+  <li><strong>Edge-Vision Frame Optimization:</strong> Limiting optical processing to 6–8 FPS at 320x240 resolution to eliminate device thermal throttling.</li>
+  <li><strong>Empirical Benchmarking:</strong> Measuring crash classification accuracy, false-positive suppression rate, and end-to-end SMS dispatch latency for conference publication and startup grant applications.</li>
+</ul>
+
+</body>
+</html>

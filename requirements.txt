@@ -1,5 +1,26 @@
+# Driver Drowsiness & Distraction Monitor — dependencies
+#
+# Core monitoring backend (required):
 opencv-python>=4.9.0
-mediapipe>=0.10.9
+# IMPORTANT: pin mediapipe. Recent mediapipe releases (0.10.15+) dropped the
+# legacy `mp.solutions.face_mesh` API this project uses, in favor of the new
+# Tasks API. Installing a bare `mediapipe>=0.10.9` today pulls a version
+# that silently breaks `mp.solutions.face_mesh` with an AttributeError.
+mediapipe==0.10.14
 numpy>=1.24.0
 pygame>=2.5.0
 pyttsx3>=2.90
+
+# Web backend (server.py) — required for both the helmet serial bridge
+# and the three-wheeler/vehicle camera AI endpoints:
+fastapi>=0.110.0
+uvicorn>=0.29.0
+pyserial>=3.5
+
+# Modern GUI vehicle selector (optional but recommended):
+# If customtkinter is not installed, the app automatically falls back to
+# a manually dark-styled plain-tkinter selector (tkinter ships with most
+# Python installs), and if no GUI/display is available at all, it falls
+# back further to a simple numbered text menu in the terminal. No code
+# changes are needed for any of these — detection is automatic at startup.
+customtkinter>=5.2.0

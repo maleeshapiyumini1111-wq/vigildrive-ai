@@ -1,5 +1,22 @@
-venv/
+# Python & Environment
 __pycache__/
 *.pyc
-.vscode/
-.DS_Store
+.env
+venv/
+
+# Node / Frontend
+node_modules/
+dist/
+
+# Proteus & Microchip Studio (XC8) Temp files / Backups
+Project Backups/
+*.pdsprj.bak
+*.d
+*.obj
+*.o
+*.hex
+*.elf
+*.as
+*.p1
+XC8Application8/Debug/
+XC8Application8/Release/
